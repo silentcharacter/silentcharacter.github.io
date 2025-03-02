@@ -98,6 +98,34 @@
         .movie-content {
             flex: 1;
             min-width: 0; /* Important for text overflow handling */
+            position: relative; /* Add this for absolute positioning of the link button */
+        }
+        
+        .imdb-link {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background-color: #f5c518; /* IMDb yellow */
+            color: #000000;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: opacity 0.2s;
+        }
+        
+        .imdb-link:hover {
+            opacity: 0.9;
+        }
+        
+        .movie-description {
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--tg-theme-text-color, #222222);
+            margin: 8px 0 32px 0; /* Add bottom margin to prevent overlap with the button */
         }
         
         .swipe-hint-left, .swipe-hint-right {
@@ -177,13 +205,6 @@
             font-size: 13px;
             color: var(--tg-theme-hint-color, #999999);
             margin-bottom: 8px;
-        }
-        
-        .movie-description {
-            font-size: 14px;
-            line-height: 1.5;
-            color: var(--tg-theme-text-color, #222222);
-            margin: 8px 0 0 0;
         }
         
         .card-footer {
@@ -632,6 +653,10 @@
                     </div>
                     <div class="movie-genre">${movie.genre}</div>
                     <p class="movie-description">${movie.description}</p>
+                    <a href="https://www.imdb.com/title/${movie.imdbID}" target="_blank" class="imdb-link">
+                        <span>IMDb</span>
+                        <span>↗</span>
+                    </a>
                 </div>
             `;
             
@@ -960,27 +985,6 @@
             }
         }
         
-        // Show details function
-        function showDetails(movieId) {
-            try {
-                const movie = movies.find(m => m.imdbID === movieId);
-                if (!movie) return;
-                
-                // Create Kinopoisk search URL (using movie title and year)
-                const searchQuery = encodeURIComponent(`${movie.title} ${movie.year}`);
-                const kinopoiskUrl = `https://www.kinopoisk.ru/index.php?kp_query=${searchQuery}`;
-                
-                // Try to open in Telegram's browser
-                if (window.Telegram && window.Telegram.WebApp) {
-                    window.Telegram.WebApp.openLink(kinopoiskUrl);
-                } else {
-                    // Fallback to opening in a new tab
-                    window.open(kinopoiskUrl, '_blank');
-                }
-            } catch (error) {
-                showError(error, 'Error opening Kinopoisk');
-            }
-        }
         
         // Debug panel functionality
         /*document.getElementById('debugPanel').addEventListener('click', function() {
