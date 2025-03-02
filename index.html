@@ -961,6 +961,8 @@
             movieCountElement.textContent = activeGenre === 'all' 
                 ? `(${moviesToRender.length})` 
                 : `(${moviesToRender.length}/${movies.length})`;
+
+            toggleFabVisibility();
         }
         
         // Share movie function
