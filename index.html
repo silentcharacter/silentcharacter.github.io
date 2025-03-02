@@ -68,6 +68,28 @@
             position: relative;
             z-index: 1;
             transition: transform 0.3s ease-out;
+            display: flex;
+            gap: 16px;
+        }
+        
+        .movie-poster {
+            width: 80px;
+            height: 120px;
+            flex-shrink: 0;
+            border-radius: 6px;
+            overflow: hidden;
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+        
+        .movie-poster img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .movie-content {
+            flex: 1;
+            min-width: 0; /* Important for text overflow handling */
         }
         
         .swipe-hint-left, .swipe-hint-right {
@@ -434,7 +456,8 @@
                 genre: "Sci-Fi, Action, Thriller",
                 description: "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
                 likesCount: Math.floor(Math.random() * 100) + 50,
-                dislikesCount: Math.floor(Math.random() * 30) + 5
+                dislikesCount: Math.floor(Math.random() * 30) + 5,
+                poster: "https://m.media-amazon.com/images/M/MV5BM2E0MDA3NWQtYzI2OS00Y2UzLWFmMjctNjRmMmM5YTA5OTRiXkEyXkFqcGc@._V1_SX300.jpg"
             },
             {
                 id: 2,
@@ -443,7 +466,8 @@
                 genre: "Drama",
                 description: "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
                 likesCount: Math.floor(Math.random() * 100) + 70,
-                dislikesCount: Math.floor(Math.random() * 20) + 3
+                dislikesCount: Math.floor(Math.random() * 20) + 3,
+                poster: "https://m.media-amazon.com/images/M/MV5BM2E0MDA3NWQtYzI2OS00Y2UzLWFmMjctNjRmMmM5YTA5OTRiXkEyXkFqcGc@._V1_SX300.jpg"
             },
             {
                 id: 3,
@@ -452,7 +476,8 @@
                 genre: "Action, Crime, Drama",
                 description: "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
                 likesCount: Math.floor(Math.random() * 100) + 60,
-                dislikesCount: Math.floor(Math.random() * 25) + 4
+                dislikesCount: Math.floor(Math.random() * 25) + 4,
+                poster: "https://m.media-amazon.com/images/M/MV5BM2E0MDA3NWQtYzI2OS00Y2UzLWFmMjctNjRmMmM5YTA5OTRiXkEyXkFqcGc@._V1_SX300.jpg"
             },
             {
                 id: 4,
@@ -461,7 +486,8 @@
                 genre: "Crime, Drama",
                 description: "The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.",
                 likesCount: Math.floor(Math.random() * 100) + 55,
-                dislikesCount: Math.floor(Math.random() * 30) + 6
+                dislikesCount: Math.floor(Math.random() * 30) + 6,
+                poster: "https://m.media-amazon.com/images/M/MV5BM2E0MDA3NWQtYzI2OS00Y2UzLWFmMjctNjRmMmM5YTA5OTRiXkEyXkFqcGc@._V1_SX300.jpg"
             },
             {
                 id: 5,
@@ -470,7 +496,8 @@
                 genre: "Action, Sci-Fi",
                 description: "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.",
                 likesCount: Math.floor(Math.random() * 100) + 65,
-                dislikesCount: Math.floor(Math.random() * 25) + 5
+                dislikesCount: Math.floor(Math.random() * 25) + 5,
+                poster: "https://m.media-amazon.com/images/M/MV5BM2E0MDA3NWQtYzI2OS00Y2UzLWFmMjctNjRmMmM5YTA5OTRiXkEyXkFqcGc@._V1_SX300.jpg"
             }
         ];
         
@@ -541,26 +568,31 @@
             const movieCard = document.createElement('div');
             movieCard.className = 'movie-card';
             movieCard.innerHTML = `
-                <div class="movie-header">
-                    <h3 class="movie-title">${movie.title}</h3>
-                    <span class="movie-year">${movie.year}</span>
+                <div class="movie-poster">
+                    <img src="${movie.poster}" alt="${movie.title} poster" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' width=\\'80\\' height=\\'120\\' viewBox=\\'0 0 80 120\\'><rect width=\\'80\\' height=\\'120\\' fill=\\'%23eee\\'/><text x=\\'50%\\' y=\\'50%\\' font-family=\\'Arial\\' font-size=\\'12\\' text-anchor=\\'middle\\' fill=\\'%23999\\'>No image</text></svg>'">
                 </div>
-                <div class="movie-genre">${movie.genre}</div>
-                <p class="movie-description">${movie.description}</p>
-                <div class="card-footer">
-                    <div class="rating-display">
-                        <div class="likes">
-                            <span class="heart-icon">💚</span>
-                            <span>${movie.likesCount}</span>
-                        </div>
-                        <div class="dislikes">
-                            <span class="heart-icon">❤️</span>
-                            <span>${movie.dislikesCount}</span>
-                        </div>
+                <div class="movie-content">
+                    <div class="movie-header">
+                        <h3 class="movie-title">${movie.title}</h3>
+                        <span class="movie-year">${movie.year}</span>
                     </div>
-                    <div class="action-buttons">
-                        <button class="btn btn-sm" onclick="shareMovie(${movie.id})">Share</button>
-                        <button class="btn btn-sm" onclick="showDetails(${movie.id})">Show in Kinopoisk</button>
+                    <div class="movie-genre">${movie.genre}</div>
+                    <p class="movie-description">${movie.description}</p>
+                    <div class="card-footer">
+                        <div class="rating-display">
+                            <div class="likes">
+                                <span class="heart-icon">💚</span>
+                                <span>${movie.likesCount}</span>
+                            </div>
+                            <div class="dislikes">
+                                <span class="heart-icon">❤️</span>
+                                <span>${movie.dislikesCount}</span>
+                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-sm" onclick="shareMovie(${movie.id})">Share</button>
+                            <button class="btn btn-sm" onclick="showDetails(${movie.id})">Show in Kinopoisk</button>
+                        </div>
                     </div>
                 </div>
             `;
