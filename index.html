@@ -536,64 +536,16 @@
     </div>
 
     <script>
-        // Sample movie data
-        let movies = [
-            {
-                imdbID: 1,
-                title: "Inception",
-                year: 2010,
-                genre: "Sci-Fi, Action, Thriller",
-                description: "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
-                likesCount: Math.floor(Math.random() * 10) + 50,
-                dislikesCount: Math.floor(Math.random() * 100) + 50,
-                poster: "https://m.media-amazon.com/images/M/MV5BM2E0MDA3NWQtYzI2OS00Y2UzLWFmMjctNjRmMmM5YTA5OTRiXkEyXkFqcGc@._V1_SX300.jpg",
-                imdbRating: (Math.random() * 9 + 1).toFixed(1)
-            },
-            {
-                imdbID: 2,
-                title: "The Shawshank Redemption",
-                year: 1994,
-                genre: "Drama",
-                description: "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
-                likesCount: Math.floor(Math.random() * 100) + 70,
-                dislikesCount: Math.floor(Math.random() * 100) + 3,
-                poster: "https://m.media-amazon.com/images/M/MV5BM2E0MDA3NWQtYzI2OS00Y2UzLWFmMjctNjRmMmM5YTA5OTRiXkEyXkFqcGc@._V1_SX300.jpg",
-                imdbRating: (Math.random() * 9 + 1).toFixed(1)
-            },
-            {
-                imdbID: 3,
-                title: "The Dark Knight",
-                year: 2008,
-                genre: "Action, Crime, Drama",
-                description: "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
-                likesCount: Math.floor(Math.random() * 100) + 60,
-                dislikesCount: Math.floor(Math.random() * 25) + 4,
-                poster: "https://m.media-amazon.com/images/M/MV5BM2E0MDA3NWQtYzI2OS00Y2UzLWFmMjctNjRmMmM5YTA5OTRiXkEyXkFqcGc@._V1_SX300.jpg",
-                imdbRating: (Math.random() * 9 + 1).toFixed(1)
-            },
-            {
-                imdbID: 4,
-                title: "Pulp Fiction",
-                year: 1994,
-                genre: "Crime, Drama",
-                description: "The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.",
-                likesCount: Math.floor(Math.random() * 100) + 55,
-                dislikesCount: Math.floor(Math.random() * 30) + 6,
-                poster: "https://m.media-amazon.com/images/M/MV5BM2E0MDA3NWQtYzI2OS00Y2UzLWFmMjctNjRmMmM5YTA5OTRiXkEyXkFqcGc@._V1_SX300.jpg",
-                imdbRating: (Math.random() * 9 + 1).toFixed(1)
-            },
-            {
-                imdbID: 5,
-                title: "The Matrix",
-                year: 1999,
-                genre: "Action, Sci-Fi",
-                description: "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.",
-                likesCount: Math.floor(Math.random() * 100) + 65,
-                dislikesCount: Math.floor(Math.random() * 25) + 5,
-                poster: "https://m.media-amazon.com/images/M/MV5BM2E0MDA3NWQtYzI2OS00Y2UzLWFmMjctNjRmMmM5YTA5OTRiXkEyXkFqcGc@._V1_SX300.jpg",
-                imdbRating: (Math.random() * 9 + 1).toFixed(1)
-            }
+        // Sample movie urls
+        const sampleMovieUrls = [
+            "https://www.imdb.com/title/tt13406094",
+            "https://www.imdb.com/title/tt1375666",
+            "https://www.imdb.com/title/tt0133093",
+            "https://www.imdb.com/title/tt10638522",
+            "https://www.imdb.com/title/tt3920596/"
         ];
+        // Sample movie data
+        let movies = [];
         
         // Store original movies for reset functionality
         const originalMovies = [...movies];
@@ -1057,8 +1009,8 @@
                     });
                 });
                 
-                // Always render movies list first regardless of environment
-                renderMovies();
+                // Initialize movies list
+                initializeMovies();
                 
                 // Check if Telegram WebApp is available
                 if (window.Telegram && window.Telegram.WebApp) {
@@ -1115,42 +1067,85 @@
             return response.json();
         }
 
-        // Add click handler for the Add Movie button
+        // Add this function to handle adding a single movie
+        async function addMovie(imdbUrl, addToStart = false) {
+            const imdbId = parseImdbIdFromUrl(imdbUrl);
+            if (!imdbId) {
+                throw new Error('Invalid IMDb URL. Please enter a valid URL (e.g., https://www.imdb.com/title/tt0062455)');
+            }
+            
+            const movieData = await fetchMovieData(imdbId);
+            
+            if (movieData.Response === 'False') {
+                throw new Error(movieData.Error || 'Failed to fetch movie data');
+            }
+            
+            // Check if movie already exists
+            if (movies.some(m => m.imdbID === movieData.imdbID)) {
+                throw new Error('This movie is already in your list');
+            }
+            
+            // Create new movie object
+            const newMovie = {
+                imdbID: movieData.imdbID,
+                title: movieData.Title,
+                year: parseInt(movieData.Year),
+                genre: movieData.Genre,
+                description: movieData.Plot,
+                likesCount: 1,
+                dislikesCount: 0,
+                poster: movieData.Poster,
+                imdbRating: movieData.imdbRating
+            };
+            
+            // Add to movies array at start or end
+            if (addToStart) {
+                movies.unshift(newMovie);
+            } else {
+                movies.push(newMovie);
+            }
+            
+            return newMovie;
+        }
+
+        // Update initialization function
+        async function initializeMovies() {
+            try {
+                // Clear existing movies
+                movies = [];
+                
+                // Fetch data for each sample movie URL
+                for (const url of sampleMovieUrls) {
+                    try {
+                        await addMovie(url);
+                    } catch (error) {
+                        console.warn(`Error adding movie from ${url}:`, error);
+                    }
+                }
+
+                for (const movie of movies) {
+                    movie.likesCount = Math.floor(Math.random() * 100) + 1;
+                    movie.dislikesCount = Math.floor(Math.random() * 100) + 1;
+                }
+                
+                // Store original movies for reset functionality
+                originalMovies.splice(0, originalMovies.length, ...movies);
+                
+                // Render the movies list
+                filterMoviesByGenre(activeGenre);
+                
+            } catch (error) {
+                showError('Failed to initialize movies', error);
+            }
+        }
+
+        // Update Add Movie button click handler
         document.getElementById('addMovieBtn').addEventListener('click', async function() {
             try {
                 const imdbUrl = document.getElementById('imdbUrl').value.trim();
-                const imdbId = parseImdbIdFromUrl(imdbUrl);
                 
-                if (!imdbId) {
-                    throw new Error('Invalid IMDb URL. Please enter a valid URL (e.g., https://www.imdb.com/title/tt0062455)');
-                }
-                
-                const movieData = await fetchMovieData(imdbId);
-                
-                if (movieData.Response === 'False') {
-                    throw new Error(movieData.Error || 'Failed to fetch movie data');
-                }
-                
-                // Check if movie already exists
-                if (movies.some(m => m.imdbID === movieData.imdbID)) {
-                    throw new Error('This movie is already in your list');
-                }
-                
-                // Create new movie object
-                const newMovie = {
-                    imdbID: movieData.imdbID,
-                    title: movieData.Title,
-                    year: parseInt(movieData.Year),
-                    genre: movieData.Genre,
-                    description: movieData.Plot,
-                    likesCount: 1,
-                    dislikesCount: 0,
-                    poster: movieData.Poster,
-                    imdbRating: movieData.imdbRating
-                };
-                
-                // Add to movies array
-                movies.unshift(newMovie);
+                // Add movie to start of list
+                await addMovie(imdbUrl, true);
                 
                 // Clear input
                 document.getElementById('imdbUrl').value = '';
