@@ -480,6 +480,31 @@
             border-color: var(--tg-theme-button-color, #2481cc);
             color: var(--tg-theme-text-color, #222222);
         }
+        
+        /* Floating action button styles */
+        .fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background-color: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+            cursor: pointer;
+            z-index: 100;
+            font-size: 24px;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        
+        .fab:hover, .fab:active {
+            transform: scale(1.05);
+            background-color: var(--tg-theme-button-color, #1a6eaa);
+        }
     </style>
 </head>
 <body>
@@ -534,6 +559,9 @@
         <div class="error-title">Error:</div>
         <div id="errorMessage"></div>
     </div>
+
+    <!-- Add this before the closing body tag -->
+    <div id="addMovieFab" class="fab">+</div>
 
     <script>
         // Sample movie urls
@@ -1048,6 +1076,23 @@
                     
                     console.warn('Telegram WebApp not available - running in standalone mode');
                 }
+                
+                // Add scroll to add movie section functionality
+                document.getElementById('addMovieFab').addEventListener('click', function() {
+                    const addMovieSection = document.querySelector('.add-movie-section');
+                    addMovieSection.scrollIntoView({ behavior: 'smooth' });
+                    
+                    // Focus on the input field after scrolling
+                    setTimeout(() => {
+                        document.getElementById('imdbUrl').focus();
+                    }, 500);
+                });
+                
+                // Initial check for FAB visibility
+                toggleFabVisibility();
+                
+                // Add scroll event listener to check visibility on scroll
+                window.addEventListener('scroll', toggleFabVisibility, { passive: true });
             } catch (error) {
                 showError(error, 'Error initializing app');
             }
@@ -1170,6 +1215,31 @@
                 showError(error);
             }
         });
+
+        // Add this function to check if an element is visible in the viewport
+        function isElementInViewport(el) {
+            const rect = el.getBoundingClientRect();
+            return (
+                rect.top >= 0 &&
+                rect.left >= 0 &&
+                rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) &&
+                rect.right <= (window.innerWidth || document.documentElement.clientWidth)
+            );
+        }
+
+        // Add this function to toggle FAB visibility based on add-movie-section visibility
+        function toggleFabVisibility() {
+            const addMovieSection = document.querySelector('.add-movie-section');
+            const fab = document.getElementById('addMovieFab');
+            
+            // If add-movie-section is partially or fully visible, hide the FAB
+            const rect = addMovieSection.getBoundingClientRect();
+            const isPartiallyVisible = 
+                rect.top < (window.innerHeight || document.documentElement.clientHeight) &&
+                rect.bottom > 0;
+            
+            fab.style.display = isPartiallyVisible ? 'none' : 'flex';
+        }
     </script>
 </body>
 </html>
