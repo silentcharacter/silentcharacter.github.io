@@ -3,74 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Telegram Mini App</title>
-    <!-- Only include the official Telegram WebApp script -->
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>Movie Sharing Mini App</title>
+    <!-- Official Telegram WebApp script -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
+        :root {
+            --tg-theme-bg-color: #ffffff;
+            --tg-theme-text-color: #222222;
+            --tg-theme-hint-color: #999999;
+            --tg-theme-link-color: #2481cc;
+            --tg-theme-button-color: #2481cc;
+            --tg-theme-button-text-color: #ffffff;
+            --tg-theme-secondary-bg-color: #f5f5f5;
+        }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--tg-theme-bg-color, #ffffff);
             color: var(--tg-theme-text-color, #222222);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
             margin: 0;
-            padding: 20px;
+            padding: 0;
             box-sizing: border-box;
-            text-align: center;
+            overflow-x: hidden;
         }
         
-        .card {
-            background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
-            border-radius: 12px;
-            padding: 24px;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 16px;
         }
         
         h1 {
             font-size: 22px;
-            margin-bottom: 24px;
+            margin: 16px 0;
             color: var(--tg-theme-text-color, #222222);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         
-        .user-info {
-            margin-bottom: 20px;
+        .movie-count {
+            font-size: 14px;
+            color: var(--tg-theme-hint-color, #999999);
+            font-weight: normal;
         }
         
-        .user-name {
-            font-size: 28px;
-            font-weight: bold;
-            margin: 10px 0;
-            color: var(--tg-theme-button-color, #2481cc);
+        .movie-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
         
-        .avatar {
-            width: 90px;
-            height: 90px;
-            border-radius: 50%;
+        .movie-card-container {
+            position: relative;
             overflow: hidden;
-            margin: 0 auto 16px;
-            background-color: var(--tg-theme-button-color, #2481cc);
+            border-radius: 12px;
+        }
+        
+        .movie-card {
+            background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 1;
+            transition: transform 0.3s ease-out;
+        }
+        
+        .swipe-hint-left, .swipe-hint-right {
+            position: absolute;
+            top: 0;
+            height: 100%;
+            width: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 40px;
             font-weight: bold;
+            color: white;
+            z-index: 0;
+            opacity: 0;
         }
         
-        .welcome-text {
-            margin-top: 16px;
+        .swipe-hint-left {
+            left: 0;
+            background-color: #4caf50; /* Green when swiping right */
+            justify-content: flex-start;
+            padding-left: 20px;
+        }
+        
+        .swipe-hint-right {
+            right: 0;
+            background-color: #f44336; /* Red when swiping left */
+            justify-content: flex-end;
+            padding-right: 20px;
+        }
+        
+        .movie-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+        
+        .movie-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 0;
+        }
+        
+        .movie-year {
+            font-size: 14px;
+            color: var(--tg-theme-hint-color, #999999);
+            background-color: rgba(0, 0, 0, 0.05);
+            padding: 2px 8px;
+            border-radius: 12px;
+        }
+        
+        .movie-genre {
+            display: inline-block;
+            font-size: 13px;
+            color: var(--tg-theme-hint-color, #999999);
+            margin-bottom: 8px;
+        }
+        
+        .movie-description {
+            font-size: 14px;
             line-height: 1.5;
+            color: var(--tg-theme-text-color, #222222);
+            margin: 8px 0 0 0;
         }
         
-        .not-telegram {
-            color: #f44336;
-            margin-top: 20px;
+        .btn {
+            background-color: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            display: inline-flex;
+            align-items: center;
+        }
+        
+        .btn:hover {
+            opacity: 0.9;
+        }
+        
+        .btn-sm {
+            padding: 4px 12px;
+            font-size: 13px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 12px;
         }
         
         /* Error container styles */
@@ -83,8 +173,6 @@
             margin-top: 20px;
             padding: 12px;
             text-align: left;
-            width: 90%;
-            max-width: 400px;
             word-break: break-word;
             display: none;
         }
@@ -107,23 +195,112 @@
             cursor: pointer;
             z-index: 1000;
         }
+        
+        .not-telegram {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: #ff9800;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 16px 0;
+            text-align: center;
+            display: none;
+            font-size: 14px;
+        }
+        
+        .swipe-instruction {
+            text-align: center;
+            color: var(--tg-theme-hint-color, #999999);
+            font-size: 14px;
+            margin: 8px 0 16px;
+            padding: 8px;
+            background-color: rgba(0, 0, 0, 0.02);
+            border-radius: 8px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--tg-theme-hint-color, #999999);
+            display: none;
+        }
+        
+        .reset-btn {
+            display: block;
+            margin: 20px auto 0;
+        }
+        
+        /* Genre filter styles */
+        .genre-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 16px;
+            padding: 4px 0;
+            overflow-x: auto;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+        
+        .genre-filter::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+        }
+        
+        .genre-tag {
+            background-color: var(--tg-theme-secondary-bg-color, #f5f5f5);
+            color: var(--tg-theme-hint-color, #999999);
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 14px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+        
+        .genre-tag.active {
+            background-color: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-button-text-color, #ffffff);
+        }
+        
+        .genre-tag:hover:not(.active) {
+            border-color: var(--tg-theme-button-color, #2481cc);
+            color: var(--tg-theme-text-color, #222222);
+        }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h1>Welcome to Mini App</h1>
+    <div class="container">
+        <h1>
+            Popular Movies
+            <span id="movieCount" class="movie-count">(5)</span>
+        </h1>
         
-        <div class="user-info">
-            <div id="avatar" class="avatar"></div>
-            <div id="userName" class="user-name">Loading...</div>
+        <div id="notTelegram" class="not-telegram">
+            This app works best within the Telegram application.
         </div>
         
-        <p class="welcome-text">This simple Telegram Mini App displays your Telegram name.</p>
+        <div id="genreFilter" class="genre-filter">
+            <div class="genre-tag active" data-genre="all">All</div>
+            <div class="genre-tag" data-genre="action">Action</div>
+            <div class="genre-tag" data-genre="drama">Drama</div>
+            <div class="genre-tag" data-genre="sci-fi">Sci-Fi</div>
+            <div class="genre-tag" data-genre="crime">Crime</div>
+            <div class="genre-tag" data-genre="thriller">Thriller</div>
+        </div>
+        
+        <div class="swipe-instruction">
+            Swipe right to LIKE, swipe left to DISLIKE
+        </div>
+        
+        <div id="emptyState" class="empty-state">
+            <p>No more movies in your list</p>
+            <button id="resetBtn" class="btn reset-btn">Reset List</button>
+        </div>
+        
+        <div class="movie-list" id="movieList">
+            <!-- Movie cards will be inserted here -->
+        </div>
     </div>
-    
-    <p id="notTelegram" class="not-telegram" style="display: none;">
-        This app only works within the Telegram application.
-    </p>
     
     <!-- Error container -->
     <div id="errorContainer">
@@ -135,6 +312,48 @@
     <div id="debugPanel">DEBUG</div>
 
     <script>
+        // Sample movie data
+        let movies = [
+            {
+                id: 1,
+                title: "Inception",
+                year: 2010,
+                genre: "Sci-Fi, Action, Thriller",
+                description: "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O."
+            },
+            {
+                id: 2,
+                title: "The Shawshank Redemption",
+                year: 1994,
+                genre: "Drama",
+                description: "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency."
+            },
+            {
+                id: 3,
+                title: "The Dark Knight",
+                year: 2008,
+                genre: "Action, Crime, Drama",
+                description: "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice."
+            },
+            {
+                id: 4,
+                title: "Pulp Fiction",
+                year: 1994,
+                genre: "Crime, Drama",
+                description: "The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption."
+            },
+            {
+                id: 5,
+                title: "The Matrix",
+                year: 1999,
+                genre: "Action, Sci-Fi",
+                description: "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers."
+            }
+        ];
+        
+        // Store original movies for reset functionality
+        const originalMovies = [...movies];
+        
         // Global error handler function
         function showError(error, details = '') {
             console.error('Error:', error);
@@ -164,9 +383,390 @@
             showError('Unhandled Promise Rejection', event.reason);
         });
         
+        // Update movie count display
+        function updateMovieCount() {
+            const movieCountElement = document.getElementById('movieCount');
+            movieCountElement.textContent = `(${movies.length})`;
+            
+            // Show/hide empty state
+            const emptyStateElement = document.getElementById('emptyState');
+            if (movies.length === 0) {
+                emptyStateElement.style.display = 'block';
+            } else {
+                emptyStateElement.style.display = 'none';
+            }
+        }
+        
+        // Create movie card element with swipe functionality
+        function createMovieCard(movie) {
+            const movieCardContainer = document.createElement('div');
+            movieCardContainer.className = 'movie-card-container';
+            movieCardContainer.dataset.movieId = movie.id;
+            
+            // Add swipe hints
+            const swipeLeftHint = document.createElement('div');
+            swipeLeftHint.className = 'swipe-hint-left';
+            swipeLeftHint.textContent = 'LIKE';
+            swipeLeftHint.style.opacity = 0;
+            
+            const swipeRightHint = document.createElement('div');
+            swipeRightHint.className = 'swipe-hint-right';
+            swipeRightHint.textContent = 'DISLIKE';
+            swipeRightHint.style.opacity = 0;
+            
+            // Create movie card
+            const movieCard = document.createElement('div');
+            movieCard.className = 'movie-card';
+            movieCard.innerHTML = `
+                <div class="movie-header">
+                    <h3 class="movie-title">${movie.title}</h3>
+                    <span class="movie-year">${movie.year}</span>
+                </div>
+                <div class="movie-genre">${movie.genre}</div>
+                <p class="movie-description">${movie.description}</p>
+                <div class="action-buttons">
+                    <button class="btn btn-sm" onclick="shareMovie(${movie.id})">Share</button>
+                    <button class="btn btn-sm" onclick="showDetails(${movie.id})">Show in Kinopoisk</button>
+                </div>
+            `;
+            
+            // Add swipe functionality
+            let startX = 0;
+            let currentX = 0;
+            let isDragging = false;
+            
+            // Touch events for mobile
+            let startY = 0;
+            let isScrolling = false;
+            let touchStartTime = 0;
+            
+            movieCard.addEventListener('touchstart', function(e) {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                touchStartTime = Date.now();
+                isDragging = false;
+                isScrolling = false;
+                
+                // Don't prevent default here to allow scrolling
+            }, { passive: true });
+            
+            movieCard.addEventListener('touchmove', function(e) {
+                const currentY = e.touches[0].clientY;
+                currentX = e.touches[0].clientX;
+                const diffX = currentX - startX;
+                const diffY = currentY - startY;
+                
+                // Determine if this is a scroll or a swipe
+                if (!isDragging && !isScrolling) {
+                    // If vertical movement is greater than horizontal, it's a scroll
+                    if (Math.abs(diffY) > Math.abs(diffX)) {
+                        isScrolling = true;
+                        return; // Allow normal scrolling
+                    }
+                    
+                    // If horizontal movement is significant, it's a swipe
+                    if (Math.abs(diffX) > 10) {
+                        isDragging = true;
+                    }
+                }
+                
+                // If we determined this is a scroll, let the browser handle it
+                if (isScrolling) return;
+                
+                // If we determined this is a swipe, handle it
+                if (isDragging) {
+                    // Prevent default only if we're swiping horizontally
+                    e.preventDefault();
+                    
+                    // Limit the drag distance
+                    if (Math.abs(diffX) < 150) {
+                        movieCard.style.transform = `translateX(${diffX}px)`;
+                    } else {
+                        // If swiped far enough, prepare for removal
+                        const direction = diffX > 0 ? 1 : -1;
+                        movieCard.style.transform = `translateX(${direction * 150}px)`;
+                    }
+                    
+                    // Show appropriate hint based on swipe direction
+                    if (diffX < -30) {
+                        // Swiping left - show red right indicator
+                        swipeRightHint.style.opacity = Math.min(1, Math.abs(diffX) / 100);
+                        swipeLeftHint.style.opacity = 0;
+                    } else if (diffX > 30) {
+                        // Swiping right - show green left indicator
+                        swipeLeftHint.style.opacity = Math.min(1, Math.abs(diffX) / 100);
+                        swipeRightHint.style.opacity = 0;
+                    }
+                }
+            }, { passive: false });
+            
+            movieCard.addEventListener('touchend', function() {
+                // Only process if we were dragging (not scrolling)
+                if (!isDragging) return;
+                
+                const touchDuration = Date.now() - touchStartTime;
+                const diffX = currentX - startX;
+                
+                // If swiped far enough or with enough velocity, remove the card
+                const velocity = Math.abs(diffX) / touchDuration;
+                if (Math.abs(diffX) > 100 || (Math.abs(diffX) > 40 && velocity > 0.5)) {
+                    removeMovie(movie.id);
+                } else {
+                    // Otherwise, snap back
+                    movieCard.style.transform = 'translateX(0)';
+                    swipeLeftHint.style.opacity = 0;
+                    swipeRightHint.style.opacity = 0;
+                }
+                
+                isDragging = false;
+            });
+            
+            // Mouse events for desktop
+            movieCard.addEventListener('mousedown', function(e) {
+                startX = e.clientX;
+                touchStartTime = Date.now();
+                isDragging = true;
+                e.preventDefault();
+            });
+            
+            movieCard.addEventListener('mousemove', function(e) {
+                if (!isDragging) return;
+                
+                currentX = e.clientX;
+                const diffX = currentX - startX;
+                
+                // Limit the drag distance
+                if (Math.abs(diffX) < 150) {
+                    movieCard.style.transform = `translateX(${diffX}px)`;
+                } else {
+                    // If dragged far enough, prepare for removal
+                    const direction = diffX > 0 ? 1 : -1;
+                    movieCard.style.transform = `translateX(${direction * 150}px)`;
+                }
+                
+                // Show appropriate hint based on swipe direction
+                if (diffX < -30) {
+                    // Swiping left - show red right indicator
+                    swipeRightHint.style.opacity = Math.min(1, Math.abs(diffX) / 100);
+                    swipeLeftHint.style.opacity = 0;
+                } else if (diffX > 30) {
+                    // Swiping right - show green left indicator
+                    swipeLeftHint.style.opacity = Math.min(1, Math.abs(diffX) / 100);
+                    swipeRightHint.style.opacity = 0;
+                }
+            });
+            
+            movieCard.addEventListener('mouseup', function() {
+                if (!isDragging) return;
+                
+                const touchDuration = Date.now() - touchStartTime;
+                const diffX = currentX - startX;
+                
+                // If dragged far enough or with enough velocity, remove the card
+                const velocity = Math.abs(diffX) / touchDuration;
+                if (Math.abs(diffX) > 100 || (Math.abs(diffX) > 40 && velocity > 0.5)) {
+                    removeMovie(movie.id);
+                } else {
+                    // Otherwise, snap back
+                    movieCard.style.transform = 'translateX(0)';
+                    swipeLeftHint.style.opacity = 0;
+                    swipeRightHint.style.opacity = 0;
+                }
+                
+                isDragging = false;
+            });
+            
+            movieCard.addEventListener('mouseleave', function() {
+                if (isDragging) {
+                    movieCard.style.transform = 'translateX(0)';
+                    swipeLeftHint.style.opacity = 0;
+                    swipeRightHint.style.opacity = 0;
+                    isDragging = false;
+                }
+            });
+            
+            // Assemble the card container
+            movieCardContainer.appendChild(swipeLeftHint);
+            movieCardContainer.appendChild(movieCard);
+            movieCardContainer.appendChild(swipeRightHint);
+            
+            return movieCardContainer;
+        }
+        
+        // Remove movie from list
+        function removeMovie(movieId) {
+            // Find the card element
+            const movieCardContainer = document.querySelector(`.movie-card-container[data-movie-id="${movieId}"]`);
+            
+            if (movieCardContainer) {
+                // Add a removal animation
+                const movieCard = movieCardContainer.querySelector('.movie-card');
+                const isSwipingRight = movieCard.style.transform.includes('translateX(1');
+                
+                // Set appropriate background color based on swipe direction
+                if (isSwipingRight) {
+                    movieCardContainer.querySelector('.swipe-hint-left').style.opacity = 1;
+                } else {
+                    movieCardContainer.querySelector('.swipe-hint-right').style.opacity = 1;
+                }
+                
+                movieCard.style.transform = isSwipingRight ? 'translateX(100vw)' : 'translateX(-100vw)';
+                movieCard.style.transition = 'transform 0.3s ease-out';
+                
+                // Remove from DOM after animation
+                setTimeout(() => {
+                    movieCardContainer.remove();
+                    
+                    // Update movies array
+                    movies = movies.filter(movie => movie.id !== movieId);
+                    
+                    // Re-apply current filter to update view
+                    filterMoviesByGenre(activeGenre);
+                }, 300);
+            }
+        }
+        
+        // Current active genre filter
+        let activeGenre = 'all';
+        
+        // Reset movie list
+        function resetMovieList() {
+            movies = [...originalMovies];
+            filterMoviesByGenre(activeGenre);
+            updateMovieCount();
+        }
+        
+        // Filter movies by genre
+        function filterMoviesByGenre(genre) {
+            activeGenre = genre;
+            
+            // Update active class on genre tags
+            const genreTags = document.querySelectorAll('.genre-tag');
+            genreTags.forEach(tag => {
+                if (tag.dataset.genre === genre) {
+                    tag.classList.add('active');
+                } else {
+                    tag.classList.remove('active');
+                }
+            });
+            
+            // Filter movies
+            const filteredMovies = genre === 'all' 
+                ? movies 
+                : movies.filter(movie => {
+                    return movie.genre.toLowerCase().includes(genre.toLowerCase());
+                });
+            
+            // Render filtered movies
+            renderMovies(filteredMovies);
+        }
+        
+        // Populate movies list
+        function renderMovies(moviesToRender = movies) {
+            const movieListElement = document.getElementById('movieList');
+            movieListElement.innerHTML = '';
+            
+            if (moviesToRender.length === 0) {
+                // Show empty state with different message for filters
+                const emptyStateElement = document.getElementById('emptyState');
+                if (activeGenre !== 'all') {
+                    emptyStateElement.querySelector('p').textContent = `No movies found in the "${activeGenre}" genre`;
+                } else {
+                    emptyStateElement.querySelector('p').textContent = 'No more movies in your list';
+                }
+                emptyStateElement.style.display = 'block';
+            } else {
+                document.getElementById('emptyState').style.display = 'none';
+                
+                moviesToRender.forEach(movie => {
+                    const movieCard = createMovieCard(movie);
+                    movieListElement.appendChild(movieCard);
+                });
+            }
+            
+            // Update the movie count to show filtered count / total
+            const movieCountElement = document.getElementById('movieCount');
+            movieCountElement.textContent = activeGenre === 'all' 
+                ? `(${moviesToRender.length})` 
+                : `(${moviesToRender.length}/${movies.length})`;
+        }
+        
+        // Share movie function
+        function shareMovie(movieId) {
+            try {
+                const movie = movies.find(m => m.id === movieId);
+                if (!movie) return;
+                
+                if (window.Telegram && window.Telegram.WebApp) {
+                    const webApp = window.Telegram.WebApp;
+                    
+                    // Try to use Telegram's native sharing
+                    if (webApp.showShareScreen) {
+                        webApp.showShareScreen({
+                            text: `Check out this movie: ${movie.title} (${movie.year}) - ${movie.description}`,
+                            buttonText: "Share Movie"
+                        });
+                    } else {
+                        // Fallback to a regular share dialog if available
+                        try {
+                            if (navigator.share) {
+                                navigator.share({
+                                    title: movie.title,
+                                    text: `Check out this movie: ${movie.title} (${movie.year}) - ${movie.description}`
+                                });
+                            } else {
+                                // If no sharing capability, just show a message
+                                alert(`Sharing: ${movie.title} (${movie.year})`);
+                            }
+                        } catch (shareError) {
+                            alert(`Sharing: ${movie.title} (${movie.year})`);
+                        }
+                    }
+                } else {
+                    // Not in Telegram, try to use Web Share API
+                    try {
+                        if (navigator.share) {
+                            navigator.share({
+                                title: movie.title,
+                                text: `Check out this movie: ${movie.title} (${movie.year}) - ${movie.description}`
+                            });
+                        } else {
+                            // No sharing capability
+                            alert(`Sharing: ${movie.title} (${movie.year})\n\nCopy this text to share:\n${movie.title} (${movie.year}) - ${movie.description}`);
+                        }
+                    } catch (webShareError) {
+                        alert(`Sharing: ${movie.title} (${movie.year})`);
+                    }
+                }
+            } catch (error) {
+                showError(error, 'Error sharing movie');
+            }
+        }
+        
+        // Show details function
+        function showDetails(movieId) {
+            try {
+                const movie = movies.find(m => m.id === movieId);
+                if (!movie) return;
+                
+                // Create Kinopoisk search URL (using movie title and year)
+                const searchQuery = encodeURIComponent(`${movie.title} ${movie.year}`);
+                const kinopoiskUrl = `https://www.kinopoisk.ru/index.php?kp_query=${searchQuery}`;
+                
+                // Try to open in Telegram's browser
+                if (window.Telegram && window.Telegram.WebApp) {
+                    window.Telegram.WebApp.openLink(kinopoiskUrl);
+                } else {
+                    // Fallback to opening in a new tab
+                    window.open(kinopoiskUrl, '_blank');
+                }
+            } catch (error) {
+                showError(error, 'Error opening Kinopoisk');
+            }
+        }
+        
         // Debug panel functionality
         document.getElementById('debugPanel').addEventListener('click', function() {
-            // Force a non-fatal error for testing
             try {
                 const webAppInfo = window.Telegram && window.Telegram.WebApp ? 
                     JSON.stringify(window.Telegram.WebApp.initDataUnsafe, null, 2) : 
@@ -178,8 +778,23 @@
             }
         });
         
+        // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
             try {
+                // Add reset button functionality
+                document.getElementById('resetBtn').addEventListener('click', resetMovieList);
+                
+                // Setup genre filter click handlers
+                const genreTags = document.querySelectorAll('.genre-tag');
+                genreTags.forEach(tag => {
+                    tag.addEventListener('click', () => {
+                        filterMoviesByGenre(tag.dataset.genre);
+                    });
+                });
+                
+                // Always render movies list first regardless of environment
+                renderMovies();
+                
                 // Check if Telegram WebApp is available
                 if (window.Telegram && window.Telegram.WebApp) {
                     // Initialize Telegram WebApp
@@ -192,50 +807,26 @@
                     webApp.expand();
                     
                     try {
-                        // Get user data
-                        const user = webApp.initDataUnsafe.user;
-                        
-                        if (user) {
-                            // Display user name
-                            const userNameElement = document.getElementById('userName');
-                            const avatarElement = document.getElementById('avatar');
-                            
-                            // Set user name
-                            const fullName = user.first_name + (user.last_name ? ' ' + user.last_name : '');
-                            userNameElement.textContent = fullName;
-                            
-                            // Set avatar initials
-                            avatarElement.textContent = user.first_name.charAt(0);
-                            
-                            // Trigger closing animation when ready
-                            webApp.ready();
-                        } else {
-                            // If user data is not available
-                            document.getElementById('userName').textContent = 'Hello, Telegram User!';
-                            document.getElementById('avatar').textContent = '?';
-                            showError('User data not available', 'The initDataUnsafe.user object is empty');
+                        // Configure theme colors if needed
+                        if (webApp.themeParams) {
+                            console.log('Theme params available:', webApp.themeParams);
                         }
+                        
+                        // Trigger closing animation when ready
+                        webApp.ready();
                     } catch (dataError) {
-                        showError(dataError, 'Error accessing user data');
-                        document.getElementById('userName').textContent = 'Error loading data';
-                        document.getElementById('avatar').textContent = '!';
+                        console.error('Error accessing web app data:', dataError);
                     }
                 } else {
-                    // Not running in Telegram
-                    document.getElementById('notTelegram').style.display = 'block';
-                    document.getElementById('userName').textContent = 'Not in Telegram';
-                    document.getElementById('avatar').textContent = '!';
+                    // Not running in Telegram - still show all functionality
+                    const notificationElement = document.getElementById('notTelegram');
+                    notificationElement.style.display = 'block';
+                    notificationElement.innerHTML = 'You\'re viewing this app outside of Telegram. Some features might be limited.';
                     
-                    if (!window.Telegram) {
-                        showError('Telegram object not found', 'Make sure the Telegram Web App JS is loaded correctly');
-                    } else if (!window.Telegram.WebApp) {
-                        showError('WebApp object not found', 'The Telegram object exists but WebApp is not available');
-                    }
+                    console.warn('Telegram WebApp not available - running in standalone mode');
                 }
             } catch (error) {
-                showError(error, 'Error initializing Telegram Mini App');
-                document.getElementById('userName').textContent = 'Error loading data';
-                document.getElementById('avatar').textContent = '!';
+                showError(error, 'Error initializing app');
             }
         });
     </script>
