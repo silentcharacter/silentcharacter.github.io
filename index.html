@@ -133,6 +133,13 @@
             margin: 8px 0 0 0;
         }
         
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+        }
+        
         .btn {
             background-color: var(--tg-theme-button-color, #2481cc);
             color: var(--tg-theme-button-text-color, #ffffff);
@@ -163,6 +170,33 @@
             margin-top: 12px;
         }
         
+        /* Rating display */
+        .rating-display {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+        }
+        
+        .likes, .dislikes {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 14px;
+        }
+        
+        .likes {
+            color: #4caf50; /* Green */
+        }
+        
+        .dislikes {
+            color: #f44336; /* Red */
+        }
+        
+        .heart-icon {
+            font-size: 16px;
+        }
+        
         /* Error container styles */
         #errorContainer {
             background-color: rgba(244, 67, 54, 0.1);
@@ -180,20 +214,6 @@
         .error-title {
             font-weight: bold;
             margin-bottom: 8px;
-        }
-        
-        /* Debug panel styles */
-        #debugPanel {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            padding: 8px;
-            border-radius: 4px;
-            font-size: 12px;
-            cursor: pointer;
-            z-index: 1000;
         }
         
         .not-telegram {
@@ -227,6 +247,89 @@
         .reset-btn {
             display: block;
             margin: 20px auto 0;
+        }
+        
+        /* Add movie form styles */
+        .add-movie-section {
+            margin-top: 30px;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            padding-top: 20px;
+        }
+        
+        .add-movie-title {
+            font-size: 18px;
+            margin: 0 0 16px 0;
+            color: var(--tg-theme-text-color, #222222);
+        }
+        
+        .add-movie-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .input-button-group {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+        
+        .input-button-group .form-group {
+            flex: 1;
+            margin-bottom: 0;
+        }
+        
+        .input-button-group .add-movie-btn {
+            white-space: nowrap;
+            margin-top: 0;
+            height: 42px;
+            align-self: flex-start;
+        }
+        
+        .form-input {
+            height: 42px;
+            box-sizing: border-box;
+        }
+        
+        .form-help {
+            margin-top: 4px;
+        }
+        
+        .form-group {
+            width: 100%;
+        }
+        
+        .form-input, .form-textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            font-size: 14px;
+            background-color: var(--tg-theme-bg-color, #ffffff);
+            color: var(--tg-theme-text-color, #222222);
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+        
+        .form-help {
+            font-size: 12px;
+            color: var(--tg-theme-hint-color, #999999);
+            margin-top: 4px;
+        }
+        
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        
+        .form-input:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--tg-theme-button-color, #2481cc);
+        }
+        
+        .add-movie-btn {
+            align-self: flex-end;
+            margin-top: 8px;
         }
         
         /* Genre filter styles */
@@ -271,7 +374,7 @@
 <body>
     <div class="container">
         <h1>
-            Here's your friends recommendations
+            Friends recommendations
             <span id="movieCount" class="movie-count">(5)</span>
         </h1>
         
@@ -300,6 +403,19 @@
         <div class="movie-list" id="movieList">
             <!-- Movie cards will be inserted here -->
         </div>
+        
+        <div class="add-movie-section">
+            <h3 class="add-movie-title">Add New Movie</h3>
+            <div class="add-movie-form">
+                <div class="input-button-group">
+                    <div class="form-group">
+                        <input type="url" id="imdbUrl" class="form-input" placeholder="IMDb URL (e.g. https://www.imdb.com/title/tt0062455)" required>
+                        <div class="form-help">Paste the full IMDb movie URL</div>
+                    </div>
+                    <button id="addMovieBtn" class="btn add-movie-btn">Add Movie</button>
+                </div>
+            </div>
+        </div>
     </div>
     
     <!-- Error container -->
@@ -307,9 +423,6 @@
         <div class="error-title">Error:</div>
         <div id="errorMessage"></div>
     </div>
-    
-    <!-- Debug panel toggle -->
-    <div id="debugPanel">DEBUG</div>
 
     <script>
         // Sample movie data
@@ -319,35 +432,45 @@
                 title: "Inception",
                 year: 2010,
                 genre: "Sci-Fi, Action, Thriller",
-                description: "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O."
+                description: "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
+                likesCount: Math.floor(Math.random() * 100) + 50,
+                dislikesCount: Math.floor(Math.random() * 30) + 5
             },
             {
                 id: 2,
                 title: "The Shawshank Redemption",
                 year: 1994,
                 genre: "Drama",
-                description: "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency."
+                description: "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
+                likesCount: Math.floor(Math.random() * 100) + 70,
+                dislikesCount: Math.floor(Math.random() * 20) + 3
             },
             {
                 id: 3,
                 title: "The Dark Knight",
                 year: 2008,
                 genre: "Action, Crime, Drama",
-                description: "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice."
+                description: "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
+                likesCount: Math.floor(Math.random() * 100) + 60,
+                dislikesCount: Math.floor(Math.random() * 25) + 4
             },
             {
                 id: 4,
                 title: "Pulp Fiction",
                 year: 1994,
                 genre: "Crime, Drama",
-                description: "The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption."
+                description: "The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.",
+                likesCount: Math.floor(Math.random() * 100) + 55,
+                dislikesCount: Math.floor(Math.random() * 30) + 6
             },
             {
                 id: 5,
                 title: "The Matrix",
                 year: 1999,
                 genre: "Action, Sci-Fi",
-                description: "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers."
+                description: "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.",
+                likesCount: Math.floor(Math.random() * 100) + 65,
+                dislikesCount: Math.floor(Math.random() * 25) + 5
             }
         ];
         
@@ -424,9 +547,21 @@
                 </div>
                 <div class="movie-genre">${movie.genre}</div>
                 <p class="movie-description">${movie.description}</p>
-                <div class="action-buttons">
-                    <button class="btn btn-sm" onclick="shareMovie(${movie.id})">Share</button>
-                    <button class="btn btn-sm" onclick="showDetails(${movie.id})">Show in Kinopoisk</button>
+                <div class="card-footer">
+                    <div class="rating-display">
+                        <div class="likes">
+                            <span class="heart-icon">💚</span>
+                            <span>${movie.likesCount}</span>
+                        </div>
+                        <div class="dislikes">
+                            <span class="heart-icon">❤️</span>
+                            <span>${movie.dislikesCount}</span>
+                        </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn btn-sm" onclick="shareMovie(${movie.id})">Share</button>
+                        <button class="btn btn-sm" onclick="showDetails(${movie.id})">Show in Kinopoisk</button>
+                    </div>
                 </div>
             `;
             
@@ -606,8 +741,20 @@
                 // Set appropriate background color based on swipe direction
                 if (isSwipingRight) {
                     movieCardContainer.querySelector('.swipe-hint-left').style.opacity = 1;
+                    
+                    // Increase likes count if swiped right (like)
+                    const movieIndex = movies.findIndex(m => m.id === movieId);
+                    if (movieIndex !== -1) {
+                        movies[movieIndex].likesCount++;
+                    }
                 } else {
                     movieCardContainer.querySelector('.swipe-hint-right').style.opacity = 1;
+                    
+                    // Increase dislikes count if swiped left (dislike)
+                    const movieIndex = movies.findIndex(m => m.id === movieId);
+                    if (movieIndex !== -1) {
+                        movies[movieIndex].dislikesCount++;
+                    }
                 }
                 
                 movieCard.style.transform = isSwipingRight ? 'translateX(100vw)' : 'translateX(-100vw)';
@@ -766,7 +913,7 @@
         }
         
         // Debug panel functionality
-        document.getElementById('debugPanel').addEventListener('click', function() {
+        /*document.getElementById('debugPanel').addEventListener('click', function() {
             try {
                 const webAppInfo = window.Telegram && window.Telegram.WebApp ? 
                     JSON.stringify(window.Telegram.WebApp.initDataUnsafe, null, 2) : 
@@ -776,7 +923,7 @@
             } catch (e) {
                 showError(e);
             }
-        });
+        });*/
         
         // Initialize app
         document.addEventListener('DOMContentLoaded', function() {
