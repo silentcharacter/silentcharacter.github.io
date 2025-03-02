@@ -749,10 +749,14 @@
             
             // Mouse events for desktop
             movieCard.addEventListener('mousedown', function(e) {
-                startX = e.clientX;
-                touchStartTime = Date.now();
-                isDragging = true;
-                e.preventDefault();
+                // Only start dragging if it's a mouse event (not a tap)
+                if (e.pointerType !== 'touch') {
+                    startX = e.clientX;
+                    currentX = e.clientX; // Initialize currentX
+                    touchStartTime = Date.now();
+                    isDragging = true;
+                    e.preventDefault();
+                }
             });
             
             movieCard.addEventListener('mousemove', function(e) {
@@ -761,36 +765,38 @@
                 currentX = e.clientX;
                 const diffX = currentX - startX;
                 
-                // Limit the drag distance
-                if (Math.abs(diffX) < 150) {
-                    movieCard.style.transform = `translateX(${diffX}px)`;
-                } else {
-                    // If dragged far enough, prepare for removal
-                    const direction = diffX > 0 ? 1 : -1;
-                    movieCard.style.transform = `translateX(${direction * 150}px)`;
-                }
-                
-                // Show appropriate hint based on swipe direction
-                if (diffX < -30) {
-                    // Swiping left - show red right indicator
-                    swipeRightHint.style.opacity = Math.min(1, Math.abs(diffX) / 100);
-                    swipeLeftHint.style.opacity = 0;
-                } else if (diffX > 30) {
-                    // Swiping right - show green left indicator
-                    swipeLeftHint.style.opacity = Math.min(1, Math.abs(diffX) / 100);
-                    swipeRightHint.style.opacity = 0;
+                // Only start showing visual feedback if the drag is intentional
+                if (Math.abs(diffX) > 10) {
+                    // Limit the drag distance
+                    if (Math.abs(diffX) < 150) {
+                        movieCard.style.transform = `translateX(${diffX}px)`;
+                    } else {
+                        // If dragged far enough, prepare for removal
+                        const direction = diffX > 0 ? 1 : -1;
+                        movieCard.style.transform = `translateX(${direction * 150}px)`;
+                    }
+                    
+                    // Show appropriate hint based on swipe direction
+                    if (diffX < -30) {
+                        // Swiping left - show red right indicator
+                        swipeRightHint.style.opacity = Math.min(1, Math.abs(diffX) / 100);
+                        swipeLeftHint.style.opacity = 0;
+                    } else if (diffX > 30) {
+                        // Swiping right - show green left indicator
+                        swipeLeftHint.style.opacity = Math.min(1, Math.abs(diffX) / 100);
+                        swipeRightHint.style.opacity = 0;
+                    }
                 }
             });
             
-            movieCard.addEventListener('mouseup', function() {
+            movieCard.addEventListener('mouseup', function(e) {
                 if (!isDragging) return;
                 
                 const touchDuration = Date.now() - touchStartTime;
                 const diffX = currentX - startX;
                 
-                // If dragged far enough or with enough velocity, remove the card
-                const velocity = Math.abs(diffX) / touchDuration;
-                if (Math.abs(diffX) > 100 || (Math.abs(diffX) > 40 && velocity > 0.5)) {
+                // Only remove if there was significant movement
+                if (Math.abs(diffX) > 100 || (Math.abs(diffX) > 40 && touchDuration < 300)) {
                     removeMovie(movie.imdbID);
                 } else {
                     // Otherwise, snap back
