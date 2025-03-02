@@ -127,18 +127,41 @@
             margin-bottom: 8px;
         }
         
+        .movie-title-container {
+            flex: 1;
+            min-width: 0; /* Ensures text truncation works */
+        }
+        
         .movie-title {
             font-size: 18px;
             font-weight: bold;
             margin: 0;
+            display: inline;
         }
         
         .movie-year {
-            font-size: 14px;
+            font-size: 16px;
             color: var(--tg-theme-hint-color, #999999);
-            background-color: rgba(0, 0, 0, 0.05);
+            font-weight: normal;
+            margin-left: 4px;
+        }
+        
+        .imdb-rating {
+            display: flex;
+            align-items: center;
+            background-color: #f5c518; /* IMDb yellow */
+            color: #000000;
             padding: 2px 8px;
-            border-radius: 12px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 14px;
+            margin-left: 8px;
+            white-space: nowrap;
+        }
+        
+        .star-icon {
+            margin-right: 3px;
+            font-size: 14px;
         }
         
         .movie-genre {
@@ -457,7 +480,8 @@
                 description: "A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.",
                 likesCount: Math.floor(Math.random() * 100) + 50,
                 dislikesCount: Math.floor(Math.random() * 30) + 5,
-                poster: "https://m.media-amazon.com/images/M/MV5BM2E0MDA3NWQtYzI2OS00Y2UzLWFmMjctNjRmMmM5YTA5OTRiXkEyXkFqcGc@._V1_SX300.jpg"
+                poster: "https://m.media-amazon.com/images/M/MV5BM2E0MDA3NWQtYzI2OS00Y2UzLWFmMjctNjRmMmM5YTA5OTRiXkEyXkFqcGc@._V1_SX300.jpg",
+                imdbRating: (Math.random() * 9 + 1).toFixed(1)
             },
             {
                 id: 2,
@@ -467,7 +491,8 @@
                 description: "Two imprisoned men bond over a number of years, finding solace and eventual redemption through acts of common decency.",
                 likesCount: Math.floor(Math.random() * 100) + 70,
                 dislikesCount: Math.floor(Math.random() * 20) + 3,
-                poster: "https://m.media-amazon.com/images/M/MV5BM2E0MDA3NWQtYzI2OS00Y2UzLWFmMjctNjRmMmM5YTA5OTRiXkEyXkFqcGc@._V1_SX300.jpg"
+                poster: "https://m.media-amazon.com/images/M/MV5BM2E0MDA3NWQtYzI2OS00Y2UzLWFmMjctNjRmMmM5YTA5OTRiXkEyXkFqcGc@._V1_SX300.jpg",
+                imdbRating: (Math.random() * 9 + 1).toFixed(1)
             },
             {
                 id: 3,
@@ -477,7 +502,8 @@
                 description: "When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest psychological and physical tests of his ability to fight injustice.",
                 likesCount: Math.floor(Math.random() * 100) + 60,
                 dislikesCount: Math.floor(Math.random() * 25) + 4,
-                poster: "https://m.media-amazon.com/images/M/MV5BM2E0MDA3NWQtYzI2OS00Y2UzLWFmMjctNjRmMmM5YTA5OTRiXkEyXkFqcGc@._V1_SX300.jpg"
+                poster: "https://m.media-amazon.com/images/M/MV5BM2E0MDA3NWQtYzI2OS00Y2UzLWFmMjctNjRmMmM5YTA5OTRiXkEyXkFqcGc@._V1_SX300.jpg",
+                imdbRating: (Math.random() * 9 + 1).toFixed(1)
             },
             {
                 id: 4,
@@ -487,7 +513,8 @@
                 description: "The lives of two mob hitmen, a boxer, a gangster and his wife, and a pair of diner bandits intertwine in four tales of violence and redemption.",
                 likesCount: Math.floor(Math.random() * 100) + 55,
                 dislikesCount: Math.floor(Math.random() * 30) + 6,
-                poster: "https://m.media-amazon.com/images/M/MV5BM2E0MDA3NWQtYzI2OS00Y2UzLWFmMjctNjRmMmM5YTA5OTRiXkEyXkFqcGc@._V1_SX300.jpg"
+                poster: "https://m.media-amazon.com/images/M/MV5BM2E0MDA3NWQtYzI2OS00Y2UzLWFmMjctNjRmMmM5YTA5OTRiXkEyXkFqcGc@._V1_SX300.jpg",
+                imdbRating: (Math.random() * 9 + 1).toFixed(1)
             },
             {
                 id: 5,
@@ -497,7 +524,8 @@
                 description: "A computer hacker learns from mysterious rebels about the true nature of his reality and his role in the war against its controllers.",
                 likesCount: Math.floor(Math.random() * 100) + 65,
                 dislikesCount: Math.floor(Math.random() * 25) + 5,
-                poster: "https://m.media-amazon.com/images/M/MV5BM2E0MDA3NWQtYzI2OS00Y2UzLWFmMjctNjRmMmM5YTA5OTRiXkEyXkFqcGc@._V1_SX300.jpg"
+                poster: "https://m.media-amazon.com/images/M/MV5BM2E0MDA3NWQtYzI2OS00Y2UzLWFmMjctNjRmMmM5YTA5OTRiXkEyXkFqcGc@._V1_SX300.jpg",
+                imdbRating: (Math.random() * 9 + 1).toFixed(1)
             }
         ];
         
@@ -573,8 +601,14 @@
                 </div>
                 <div class="movie-content">
                     <div class="movie-header">
-                        <h3 class="movie-title">${movie.title}</h3>
-                        <span class="movie-year">${movie.year}</span>
+                        <div class="movie-title-container">
+                            <h3 class="movie-title">${movie.title}</h3>
+                            <span class="movie-year">(${movie.year})</span>
+                        </div>
+                        <div class="imdb-rating">
+                            <span class="star-icon">★</span>
+                            <span>${movie.imdbRating}</span>
+                        </div>
                     </div>
                     <div class="movie-genre">${movie.genre}</div>
                     <p class="movie-description">${movie.description}</p>
